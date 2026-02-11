@@ -12,7 +12,7 @@ function App() {
         <Link to="/about" style={{ color: 'white', marginRight: '1rem' }}>About</Link>
         <Link to="/contact" style={{ color: 'white' }}>Contact</Link>
       </nav>
-
+<h1>ha</h1>
 
       <Routes>
         <Route path="/" element={<Home />} />
