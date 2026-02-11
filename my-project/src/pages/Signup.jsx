@@ -1,99 +1,149 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const Signin = () => {
-  const [credentials, setCredentials] = useState({
-    email: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  // Updates state dynamically based on input "name" attribute
-  const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value,
+const Signup = () => {
+    const [credentials, setCredentials] = useState({
+        email: '',
+        password: '',
     });
-  };
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
 
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    const handleChange = (e) => {
+        setCredentials({
+            ...credentials,
+            [e.target.name]: e.target.value,
+        });
+    };
 
-    try {
-      const response = await fetch('http://127.0.0.1:8000/signup', { // Ensure this matches your login route
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess(false);
 
-      const data = await response.json();
+        try {
+            const response = await fetch('http://127.0.0.1:8000/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials),
+            });
 
-      if (response.ok) {
-        // Success: Typically you'd store a token and redirect the user
-        console.log('Login Success:', data);
-        alert('Welcome back!');
-        // localStorage.setItem('token', data.token); 
-      } else {
-        // Error: Display the message from the backend
-        setError(data.detail || 'Invalid email or password');
-      }
-    } catch (err) {
-      setError('Connection failed. Please check if the server is running.');
-    } finally {
-      setLoading(false);
-    }
-  };
+            const data = await response.json();
 
-  return (
-    <div style={styles.wrapper}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Sign In</h2>
-        <form onSubmit={handleSignIn} style={styles.form}>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            required
-            value={credentials.email}
-            onChange={handleChange}
-            style={styles.input}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            value={credentials.password}
-            onChange={handleChange}
-            style={styles.input}
-          />
-          <button 
-            type="submit" 
-            disabled={loading} 
-            style={loading ? {...styles.button, opacity: 0.7} : styles.button}
-          >
-            {loading ? 'Authenticating...' : 'Sign In'}
-          </button>
-        </form>
-        {error && <p style={styles.error}>{error}</p>}
-      </div>
-    </div>
-  );
+            if (response.ok) {
+                console.log('Signup Success:', data);
+                setSuccess(true);
+                // Reset form
+                setCredentials({ email: '', password: '' });
+            } else {
+                setError(data.detail || 'Signup failed. Please try again.');
+                console.error('Signup Error:', data);
+            }
+        } catch (err) {
+            setError('Connection failed. Please check if the backend server is running on port 8000.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-neutral-900/50 p-8 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl">
+                <div>
+                    <div className="mx-auto h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                        <span className="text-white font-bold text-xl text-shadow-sm">C</span>
+                    </div>
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white tracking-tight">
+                        Create an account
+                    </h2>
+                    <p className="mt-2 text-center text-sm text-gray-400">
+                        Join ChatUI and start exploring
+                    </p>
+                </div>
+
+                {success && (
+                    <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded-lg text-center animate-in fade-in zoom-in duration-300">
+                        <p className="font-medium text-sm">Account created successfully!</p>
+                        <Link to="/login" className="text-xs underline mt-1 block">Proceed to Login</Link>
+                    </div>
+                )}
+
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg text-center animate-in shake duration-300">
+                        <p className="font-medium text-sm">{error}</p>
+                    </div>
+                )}
+
+                <form className="mt-8 space-y-6" onSubmit={handleSignUp}>
+                    <div className="rounded-md shadow-sm space-y-4">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                                Email Address
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                required
+                                value={credentials.email}
+                                onChange={handleChange}
+                                className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm"
+                                placeholder="name@example.com"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                required
+                                value={credentials.password}
+                                onChange={handleChange}
+                                className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm"
+                                placeholder="••••••••"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
+                        >
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Creating account...
+                                </span>
+                            ) : (
+                                'Sign Up'
+                            )}
+                        </button>
+                    </div>
+                </form>
+
+                <div className="text-center">
+                    <p className="text-sm text-gray-500">
+                        Already have an account?{' '}
+                        <Link to="/login" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
 };
 
-// Inline styles for a quick, clean UI
-const styles = {
-  wrapper: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', fontFamily: 'sans-serif' },
-  card: { padding: '2rem', border: '1px solid #eaeaea', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '350px' },
-  title: { textAlign: 'center', marginBottom: '1.5rem', color: '#333' },
-  form: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  input: { padding: '12px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '16px' },
-  button: { padding: '12px', borderRadius: '6px', border: 'none', backgroundColor: '#4F46E5', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
-  error: { color: '#D60000', fontSize: '14px', marginTop: '10px', textAlign: 'center' }
-};
-
-export default Signin;
+export default Signup;
