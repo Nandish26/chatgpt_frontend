@@ -31,11 +31,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Footer text */}
-      <p className="text-xs text-gray-400 mt-10 text-center max-w-md">
-        By messaging ChatGPT, you agree to our Terms and have read our Privacy
-        Policy.
-      </p>
+   
     </div>
   );
 };

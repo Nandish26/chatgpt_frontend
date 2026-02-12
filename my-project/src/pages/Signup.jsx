@@ -50,8 +50,20 @@ const Signup = () => {
         }
     };
 
+    const handleSignOut = () => {
+        localStorage.clear();
+        // Redirect to login or home
+        window.location.href = '/login';
+    };
+
     return (
-        <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 relative">
+            <button
+                onClick={handleSignOut}
+                className="absolute top-6 right-6 px-4 py-2 bg-neutral-800/50 hover:bg-neutral-800 text-gray-400 hover:text-white rounded-lg text-sm font-medium transition-all border border-white/5 hover:border-white/10"
+            >
+                Sign Out
+            </button>
             <div className="max-w-md w-full space-y-8 bg-neutral-900/50 p-8 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl">
                 <div>
                     <div className="mx-auto h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">

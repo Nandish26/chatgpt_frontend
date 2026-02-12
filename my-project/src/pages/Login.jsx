@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -9,6 +9,13 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (localStorage.getItem('access_token')) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     const handleChange = (e) => {
         setCredentials({
@@ -26,132 +33,109 @@ const Login = () => {
             const response = await fetch('http://127.0.0.1:8000/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json', // Matches your requirement
                 },
-                body: JSON.stringify(credentials),
+                body: JSON.stringify({
+                    email: credentials.email,
+                    password: credentials.password
+                }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                console.log('Login success:', data);
-                // Store tokens
+                // Matches your backend response keys: access_token, refresh_token
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('refresh_token', data.refresh_token);
-                // Redirect to home or chat
+                localStorage.setItem('token_type', data.token_type);
+
+                console.log('Login successful');
                 navigate('/');
             } else {
+                // Handles backend error messages (usually in 'detail' field for FastAPI)
                 setError(data.detail || 'Invalid email or password');
             }
         } catch (err) {
-            setError('Connection failed. Please check if the backend server is running.');
+            setError('Cannot connect to server. Ensure backend is running on port 8000.');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('token_type');
+        window.location.reload();
+    };
+
     return (
-        <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-black px-4 relative">
+            <button
+                onClick={handleLogout}
+                className="absolute top-6 right-6 px-4 py-2 bg-neutral-800/50 hover:bg-neutral-800 text-gray-400 hover:text-white rounded-lg text-sm font-medium transition-all border border-white/5 hover:border-white/10"
+            >
+                Log Out
+            </button>
             <div className="max-w-md w-full space-y-8 bg-neutral-900/50 p-8 rounded-2xl backdrop-blur-xl border border-white/10 shadow-2xl">
                 <div>
-                    <div className="mx-auto h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                        <span className="text-white font-bold text-xl text-shadow-sm">C</span>
+                    <div className="mx-auto h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                        <span className="text-white font-bold text-xl">C</span>
                     </div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white tracking-tight">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
                         Welcome Back
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-400">
-                        Sign in to your ChatUI account
+                        Sign in to your account
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg text-center animate-in shake duration-300">
-                        <p className="font-medium text-sm">{error}</p>
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg text-center text-sm">
+                        {error}
                     </div>
                 )}
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="rounded-md shadow-sm space-y-4">
+                    <div className="space-y-4">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                                Email Address
-                            </label>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Email Address</label>
                             <input
-                                id="email"
                                 name="email"
                                 type="email"
                                 required
                                 value={credentials.email}
                                 onChange={handleChange}
-                                className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm"
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 placeholder="name@example.com"
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                                Password
-                            </label>
+                            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
                             <input
-                                id="password"
                                 name="password"
                                 type="password"
                                 required
                                 value={credentials.password}
                                 onChange={handleChange}
-                                className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm"
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 placeholder="••••••••"
                             />
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <input
-                                id="remember-me"
-                                name="remember-me"
-                                type="checkbox"
-                                className="h-4 w-4 text-indigo-500 focus:ring-indigo-500 border-white/10 rounded bg-white/5"
-                            />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
-                                Remember me
-                            </label>
-                        </div>
-
-                        <div className="text-sm">
-                            <a href="#" className="font-medium text-indigo-400 hover:text-indigo-300">
-                                Forgot your password?
-                            </a>
-                        </div>
-                    </div>
-
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/25"
-                        >
-                            {loading ? (
-                                <span className="flex items-center gap-2">
-                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Signing in...
-                                </span>
-                            ) : (
-                                'Sign In'
-                            )}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 px-4 font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all disabled:opacity-50"
+                    >
+                        {loading ? 'Signing in...' : 'Sign In'}
+                    </button>
                 </form>
 
                 <div className="text-center">
                     <p className="text-sm text-gray-500">
-                        Don't have an account?{' '}
-                        <Link to="/signup" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
-                            Create one for free
-                        </Link>
+                        Don't have an account? <Link to="/signup" className="text-indigo-400 hover:text-indigo-300">Create one</Link>
                     </p>
                 </div>
             </div>
